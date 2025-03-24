@@ -1,16 +1,19 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  users: JSON.parse(localStorage.getItem('users')) || []
+  users: [],
+  selectedUsers: [], // ✅ Store selected users
 };
 
 const userSlice = createSlice({
-  name: 'users',
+  name: "users",
   initialState,
   reducers: {
     addUser: (state, action) => {
       state.users.push(action.payload);
-      localStorage.setItem('users', JSON.stringify(state.users));
+    },
+    deleteUser: (state, action) => {
+      state.users = state.users.filter(user => user.id !== action.payload);
     },
     updateUser: (state, action) => {
       const { id, name, email } = action.payload;
@@ -19,14 +22,21 @@ const userSlice = createSlice({
         user.name = name;
         user.email = email;
       }
-      localStorage.setItem('users', JSON.stringify(state.users));
     },
-    deleteUser: (state, action) => {
-      state.users = state.users.filter(user => user.id !== action.payload);
-      localStorage.setItem('users', JSON.stringify(state.users));
+    toggleSelectUser: (state, action) => {
+      const id = action.payload;
+      if (state.selectedUsers.includes(id)) {
+        state.selectedUsers = state.selectedUsers.filter(userId => userId !== id);
+      } else {
+        state.selectedUsers.push(id);
+      }
+    },
+    deleteSelectedUsers: (state) => {
+      state.users = state.users.filter(user => !state.selectedUsers.includes(user.id));
+      state.selectedUsers = []; // Clear selection
     }
   }
 });
 
-export const { addUser, updateUser, deleteUser } = userSlice.actions;
+export const { addUser, deleteUser, updateUser, toggleSelectUser, deleteSelectedUsers } = userSlice.actions;
 export default userSlice.reducer;
